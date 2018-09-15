@@ -23,25 +23,29 @@ APP.get('/', (req, res) => {
 async function updateScholarsData (db) {
   console.group('APP - updating scholars data')
 
+  const scholars = await db.collection('scholars').find({}).toArray()
+
+  const perfmLvl = await db.collection('performance-levels').find({}).toArray()
+
+  let updatedScholars = []
   try {
-    const scholars = await db.collection('scholars').find({}).toArray()
-
-    const perfmLvl = await db.collection('performance-levels').find({}).toArray()
-    let updatedScholars = await libs.updateScholars(scholars, perfmLvl)
-
-    for await (let scholar of updatedScholars) {
-      console.log('updating: ', scholar.name)
-      delete scholar._id
-      console.log(scholar._id)
-      const result = await db.collection('scholars').updateOne({ ronin: scholar.ronin }, { $set: scholar })
-      console.log(result)
-    }
-
+    updatedScholars = await libs.updateScholars(scholars, perfmLvl)  
   } catch (err) {
-    console.log(err)
+    throw new Error(err)
+  }
+  
+
+  for await (let scholar of updatedScholars) {
+    console.log('updating: ', scholar.name)
+    delete scholar._id
+    console.log(scholar._id)
+    const result = await db.collection('scholars').updateOne({ ronin: scholar.ronin }, { $set: scholar })
+    console.log(result)
   }
 
   console.groupEnd()
+  
+  return {}
 }
 
 const init = async () => {
@@ -96,9 +100,15 @@ const init = async () => {
 	  try {
 	    await updateScholarsData(req.ctx.db)
 	    res.json({ success: true })
+
 	  } catch (err) {
+      console.log('AQUI')
 	  	console.log(err)
-	    res.end(JSON.stringify(err, null, 4))
+	    res.json({
+        success: false,
+        err
+      })
+
 	  }
 
 	  console.groupEnd()
