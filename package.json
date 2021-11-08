@@ -7,5 +7,14 @@
     "test": "mocha"
   },
   "author": "Douglas Socorro",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4"
+  }
 }
