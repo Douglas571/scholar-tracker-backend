@@ -1,9 +1,11 @@
 {
   "name": "scholar-tracker-backend",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "The backend for a axie infinity scholar tracker",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "mocha"
   },
   "author": "Douglas Socorro",
