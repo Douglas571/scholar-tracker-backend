@@ -1,0 +1,11 @@
+{
+  "name": "scholar-tracker-backend",
+  "version": "1.0.0",
+  "description": "The backend for a axie infinity scholar tracker",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Douglas Socorro",
+  "license": "MIT"
+}
