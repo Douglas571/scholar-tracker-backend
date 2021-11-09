@@ -12,6 +12,13 @@ let PORT = process.env.PORT || 3001
 APP.use(bodyParser.json())
 APP.use(cors())
 
+APP.get('/performance-levels', (req, res) => {
+	console.log('APP - GEP - /performance-levels ')
+	res.json({
+		performanceLevels: DATA.performanceLevels
+	})
+})
+
 APP.post('/performance-levels', (req, res) => {
 	/* format
 		performanceLevel {
@@ -31,14 +38,15 @@ APP.post('/performance-levels', (req, res) => {
 	console.log('Index.js - POST - /performance-levels')
 
 	let { performanceLevel } = req.body
+	performanceLevel.id = Date.now()
 
 	if (process.env.DEBUG == 'deep') {
 		console.log(performanceLevel)
 	}
 
-	DATA.performanceLevel.push(performanceLevel)
+	DATA.performanceLevels.push(performanceLevel)
 
-	res.json({ performanceLevel })
+	res.json({ performanceLevels: DATA.performanceLevels })
 
 })
 
