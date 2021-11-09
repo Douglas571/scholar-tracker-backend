@@ -1,5 +1,13 @@
 const scholars = new Map()
 
+scholars.set('0x0', {
+	name: 'Douglas',
+	SLP: 1400,
+	MMR: 30,
+
+	withdraw: Date.now()
+})
+
 const performanceLevels = [
 	{
 		id: 1,
