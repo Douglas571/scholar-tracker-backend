@@ -8,6 +8,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const got = require('got')
 
 const DATA = require('./data')
 
@@ -153,19 +154,39 @@ async function updateScholarsData() {
 	console.log(roninStringChain)
 	//consultar la api
 
-	
+	let { body } = await got(`https://game-api.axie.technology/api/v1/${roninStringChain}`)
+	let data = JSON.parse(body)
+	console.log(data)
+
+	console.log('end fetching')
+
 	//mapear el resultado y guardar en "Scholars"
+	for(let ronin in data) {
+		let scholar = DATA.scholars.get(ronin)
+		console.log(scholar)
+		let scholarOrigin = data[ronin]
+
+		scholar.gameName = scholarOrigin.name
+		scholar.slp = scholarOrigin['in_game_slp']
+		scholar.mmr = scholarOrigin.mmr
+		scholar.nextClaim = scholarOrigin['next_claim']
+
+		DATA.scholars.set(ronin, scholar)
+	}
+
+	console.log(DATA.scholars)
 
 	console.groupEnd()
 }
 
 async function calculatePayments() {
 	//mapear cada uno de los becados
+
 	//calcular pagos
 	//almacenar datos en "Scholars"
 }
 
 (async () => {
-	updateScholarsData()
+	//updateScholarsData()
 	calculatePayments()
 })();

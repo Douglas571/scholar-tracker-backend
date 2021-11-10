@@ -9,10 +9,7 @@ scholars.set('0xaf972caf000306230f3e482bb408a0d488fd7676', {
 
 	},
 
-	ronin: '0xaf972caf000306230f3e482bb408a0d488fd7676',
 	roninForPay: '0x4238497',
-
-	withdrawalDate: Date.now()
 })
 
 scholars.set('0xfbd406d3c61e21916f6ed28a7376848b8b4533be', {
