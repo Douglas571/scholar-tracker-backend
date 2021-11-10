@@ -2,17 +2,24 @@ const scholars = new Map()
 
 scholars.set('0x0', {
 	name: 'Douglas',
-	SLP: 1400,
-	MMR: 30,
+	slp: 1400,
+	mmr: 30,
 
-	withdraw: Date.now()
+	slpToPay: {
+
+	},
+
+	ronin: '0x0',
+	roninForPay: '0x4238497',
+
+	withdrawalDate: Date.now()
 })
 
 const performanceLevels = [
 	{
 		id: 1,
 		level: 1,
-		SLP: {
+		slp: {
 			bottom: 0,
 			top: 1500
 		},

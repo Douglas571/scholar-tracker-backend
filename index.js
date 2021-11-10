@@ -1,4 +1,4 @@
-require('dotenv').config()
+//require('dotenv').config()
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -19,7 +19,7 @@ APP.get('/performance-levels', (req, res) => {
 	let nextMinSLP = 0
 
 	if (lastLevel) {
-		nextMinSLP = lastLevel.SLP.top
+		nextMinSLP = lastLevel.slp.top
 	}
 
 	res.json({
@@ -74,14 +74,54 @@ APP.delete('/performance-levels/:id', (req, res) => {
 })
 
 APP.route('/scholars')
+	.get((req, res) => {
+		/* format
+			
+			scholars [
+				{
+					ronin
+					name
+					slp
+					mmr
+
+					withdrawalDate
+
+				}
+			]
+		*/
+
+		let scholars = []
+
+		DATA.scholars.forEach((scholar, ronin) => {
+			scholars.push(scholar)
+		})
+
+		res.json({ scholars })
+	})
 	.post((req, res) => {
-		console.log('APP - GET - /scholars')
+		/* format
+
+			scholar {
+				name
+				ronin
+				roninForPay
+			}
+	
+		*/
+
+		console.group('APP - POST - /scholars')
 		console.log(req.body)
 
 		const scholar = req.body.scholar
 
+		scholar.slpToPay = {}
+
+		DATA.scholars.set(scholar.ronin, scholar)
+
 		let success = true
-		res.json({ success, scholars: DATA.scholars })
+
+		console.groupEnd()
+		res.json({ success, scholars: Object.fromEntries(DATA.scholars) })
 	})
 
 APP.get('/', (req, res) => {
