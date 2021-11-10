@@ -62,6 +62,7 @@ APP.post('/performance-levels', (req, res) => {
 
 	DATA.performanceLevels.push(performanceLevel)
 
+	calculatePayments()
 	res.json({ performanceLevels: DATA.performanceLevels })
 })
 
@@ -81,7 +82,7 @@ APP.delete('/performance-levels/:id', (req, res) => {
 })
 
 APP.route('/scholars')
-	.get((req, res) => {
+	.get(async (req, res) => {
 		/* format
 			
 			scholars [
@@ -91,7 +92,7 @@ APP.route('/scholars')
 					slp
 					mmr
 
-					withdrawalDate
+					nextClaim
 
 				}
 			]
@@ -100,12 +101,13 @@ APP.route('/scholars')
 		let scholars = []
 
 		DATA.scholars.forEach((scholar, ronin) => {
+			scholar.ronin = ronin
 			scholars.push(scholar)
 		})
 
 		res.json({ scholars })
 	})
-	.post((req, res) => {
+	.post(async (req, res) => {
 		/* format
 
 			scholar {
@@ -128,6 +130,7 @@ APP.route('/scholars')
 		let success = true
 
 		console.groupEnd()
+		await updateScholarsData()
 		res.json({ success, scholars: Object.fromEntries(DATA.scholars) })
 	})
 
@@ -177,16 +180,53 @@ async function updateScholarsData() {
 	console.log(DATA.scholars)
 
 	console.groupEnd()
+
+	calculatePayments()
 }
 
-async function calculatePayments() {
+function calculatePayments() {
 	//mapear cada uno de los becados
+	console.group('Index.js - calculatePayments')
+	console.log('prev scholars:')
+	console.log(DATA.scholars)
 
+	let newScholars = new Map()
+	DATA.scholars.forEach((scholar, ronin) => {
+		console.log('PREV scholar')
+		console.log(scholar)
+
+		scholar.slpToPay = {}
+
+		DATA.performanceLevels.forEach( level => {
+			let { slp } = scholar
+			if ((slp >= level.slp.bottom) && (slp < level.slp.top)) {
+				let slpToHimself = (slp * level.percentage.scholar) / 100
+				let slpToManager = (slp * level.percentage.manager) / 100
+				let slpToInv = (slp * level.percentage.investor) / 100
+
+				scholar.performance = level.level
+				scholar.percent = level.percentage.scholar
+
+				scholar.slpToPay = {
+					self: slpToHimself,
+					manager: slpToManager,
+					investor: slpToInv
+				}
+
+				console.log('total: ', (slpToHimself + slpToManager + slpToInv))
+			}
+		})
+
+		console.log('FINAL scholar')
+		console.log(scholar)
+		console.log()
+	})
 	//calcular pagos
 	//almacenar datos en "Scholars"
+	console.log('final scholars:')
+	console.log(DATA.scholars)
 }
 
 (async () => {
-	//updateScholarsData()
-	calculatePayments()
+	updateScholarsData()
 })();
