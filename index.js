@@ -137,3 +137,35 @@ APP.get('/', (req, res) => {
 APP.listen(PORT, (err) => {
 	console.log(`Listing in: localhost:${PORT}`)
 })
+
+//------------------------------------------------------
+
+async function updateScholarsData() {
+	console.group('Index.js - updateScholarsData')
+	//crear una cadena de texto con todas las direcciones
+	let roninList = []
+
+	DATA.scholars.forEach((_, ronin) => {
+		roninList.push(ronin)
+	})
+
+	let roninStringChain = roninList.join(',')
+	console.log(roninStringChain)
+	//consultar la api
+
+	
+	//mapear el resultado y guardar en "Scholars"
+
+	console.groupEnd()
+}
+
+async function calculatePayments() {
+	//mapear cada uno de los becados
+	//calcular pagos
+	//almacenar datos en "Scholars"
+}
+
+(async () => {
+	updateScholarsData()
+	calculatePayments()
+})();
