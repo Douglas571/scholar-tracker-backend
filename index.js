@@ -1,3 +1,9 @@
+// scholar-tracker-backend
+
+// scholar-tracker-frontend
+// heroku create scholar-tracker-frontend --buildpack mars/create-react-app
+
+
 //require('dotenv').config()
 const express = require('express')
 const bodyParser = require('body-parser')
