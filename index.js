@@ -11,6 +11,7 @@ const cors = require('cors')
 const got = require('got')
 
 const DATA = require('./data')
+const ROUTER_API_V2 = require('./routers/api-v2')
 
 const APP = express()
 
@@ -19,17 +20,7 @@ let PORT = process.env.PORT || 3001
 APP.use(bodyParser.json())
 APP.use(cors())
 
-APP.post('/v2/performance-levels', (req, res) => {
-	console.log(req.body)
-
-	let { performanceLevels } = req.body
-
-
-
-	res.json({
-		success: true
-	})
-})
+APP.use('/v2', ROUTER_API_V2)
 
 APP.get('/performance-levels', (req, res) => {
 	console.log('APP - GEP - /performance-levels ')

@@ -45,14 +45,19 @@ describe('/performance-levels', () => {
 			json: {
 				performanceLevels: levels
 			}
-		})
+		}).json()
 
-		console.log(res)
+		expect(res.success).toEqual(true)
 
-		let data = res.json()
-		expect(data).toEqual({ 
-			success: true
-		})
+		let resivedLevels = res.data.performanceLevelsAdded
+
+		expect(resivedLevels[0].id).toBeDefined()
+		expect(resivedLevels[0].level).toBe(1)
+
+		res = await got(`${HOST}/v2/performance-levels`).json()
+
+		expect(res.data.performanceLevels).toEqual(resivedLevels)
+
 	})
 
 	afterAll(() => {
