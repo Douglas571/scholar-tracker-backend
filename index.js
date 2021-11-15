@@ -5,6 +5,7 @@
 
 
 //require('dotenv').config()
+const { MongoClient } = require('mongodb')
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -19,8 +20,6 @@ let PORT = process.env.PORT || 3001
 
 APP.use(bodyParser.json())
 APP.use(cors())
-
-APP.use('/v2', ROUTER_API_V2)
 
 APP.get('/performance-levels', (req, res) => {
 	console.log('APP - GEP - /performance-levels ')
@@ -141,9 +140,6 @@ APP.get('/', (req, res) => {
 	res.end(`<h1>Hello World!</h1>`)
 })
 
-APP.listen(PORT, (err) => {
-	console.log(`Listing in: localhost:${PORT}`)
-})
 
 //------------------------------------------------------
 
@@ -231,5 +227,29 @@ function calculatePayments() {
 }
 
 (async () => {
+
+	const URL = 'mongodb://localhost:27017'
+	const client = new MongoClient(URL)
+
+	await client.connect()
+	const db = client.db('scholar-tracker')
+
+	APP.use((req, res, next) => {
+		console.log('seting context')
+
+		req.ctx = {
+			db
+		}
+
+		next()
+	})
+
+	APP.use('/v2', ROUTER_API_V2)
+
+	APP.listen(PORT, (err) => {
+		console.log(`Listing in: localhost:${PORT}`)
+	})
+
+
 	//updateScholarsData()
 })();
