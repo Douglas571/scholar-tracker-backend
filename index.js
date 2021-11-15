@@ -19,6 +19,18 @@ let PORT = process.env.PORT || 3001
 APP.use(bodyParser.json())
 APP.use(cors())
 
+APP.post('/v2/performance-levels', (req, res) => {
+	console.log(req.body)
+
+	let { performanceLevels } = req.body
+
+
+
+	res.json({
+		success: true
+	})
+})
+
 APP.get('/performance-levels', (req, res) => {
 	console.log('APP - GEP - /performance-levels ')
 
@@ -228,5 +240,5 @@ function calculatePayments() {
 }
 
 (async () => {
-	updateScholarsData()
+	//updateScholarsData()
 })();

@@ -1,0 +1,7 @@
+{   
+    "ignore": [
+    	"*.test.js", 
+    	"jest.config.js",
+    	"README"
+    ] 
+}
