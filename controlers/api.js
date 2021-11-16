@@ -1,7 +1,4 @@
-const collections = require('./../database')
-
 module.exports = {
-
 	addLevels: async (req, res) => {
 		const { db } = req.ctx
 
@@ -86,8 +83,6 @@ module.exports = {
 				message: 'some problems :('
 			})	
 		}
-
-		
 	},
 
 	getScholars: async(req, res) => {
