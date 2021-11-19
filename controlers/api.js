@@ -1,21 +1,16 @@
 module.exports = {
-	addLevels: async (req, res) => {
+	addLevel: async (req, res) => {
 		const { db } = req.ctx
 
-		let { performanceLevels } = req.body
+		let { performanceLevel } = req.body
 
-		performanceLevels = performanceLevels.map( level => {
-			level.id = Date.now()
-			return level
-		})
+		performanceLevel.id = Date.now()
 
-		db.collection('performance-levels').insertMany(JSON.parse(JSON.stringify(performanceLevels)))
+		db.collection('performance-levels').insertOne(JSON.parse(JSON.stringify(performanceLevel)))
 
 		res.json({
 			success: true,
-			data: {
-				performanceLevelsAdded: performanceLevels
-			}
+			performanceLevelAdded: performanceLevel
 		})
 	},
 
@@ -32,14 +27,11 @@ module.exports = {
 					return level
 				})
 
-
 		console.log(results)
 
 		res.json({
 			success: true,
-			data: {
-				performanceLevels: results
-			}
+			performanceLevels: results
 		})
 	},
 
@@ -69,7 +61,7 @@ module.exports = {
 		let { scholar } = req.body
 
 		const result = await db.collection('scholars').insertOne(scholar)
-		console.log('GET /scholars')
+		console.log('POST /scholars')
 		console.log(result)
 
 		if(result.insertedId) {
@@ -86,6 +78,16 @@ module.exports = {
 	},
 
 	getScholars: async(req, res) => {
-		res.json({})
+		let results
+
+		results = await req.ctx.db.collection('scholars').find({}).toArray()
+		console.group(`API - get Scholars`)
+		
+		console.log(`The scholars are: ${JSON.stringify(results, null, 4)}`)
+		
+		console.groupEnd()
+		
+
+		res.json({ scholars: results })
 	}
 }
