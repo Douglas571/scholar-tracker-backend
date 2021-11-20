@@ -116,7 +116,7 @@ function calculatePayments() {
 
 
 	let URL = ''
-	if (process.env.NODE_ENV === 'dev:online') {
+	if (['dev:online', 'production'].includes(process.env.NODE_ENV)) {
 		URL = process.env.DB_URL
 		console.log(`Connecting to Mongo Atlas in: ${URL}`)
 
