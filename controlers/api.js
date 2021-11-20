@@ -72,21 +72,26 @@ module.exports = {
 		let success = false
 
 		const { db } = req.ctx 
+
+		console.log(req.body)
+
 		let { scholar } = req.body
 
-		const result = await db.collection('scholars').insertOne(scholar)
-		console.log('POST /scholars')
-		console.log(result)
+		if (scholar) {
+			const result = await db.collection('scholars').insertOne(scholar)
+			console.log('POST /scholars')
+			console.log(result)
 
-		if(result.insertedId) {
-			res.json({
-				success: true,
-				scholar
-			})	
+			if(result.insertedId) {
+				res.json({
+					success: true,
+					scholar
+				})
+			}
 		} else {
 			res.json({
 				success: false,
-				message: 'some problems :('
+				message: `There's not scholar :(`
 			})	
 		}
 	},

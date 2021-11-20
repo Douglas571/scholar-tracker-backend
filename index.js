@@ -113,10 +113,33 @@ function calculatePayments() {
 
 (async () => {
 
-	const URL = 'mongodb://localhost:27017'
+
+
+	let URL = ''
+	if (process.env.NODE_ENV === 'dev:online') {
+		URL = process.env.DB_URL
+		console.log(`Connecting to Mongo Atlas in: ${URL}`)
+
+	} else {
+		URL = 'mongodb://localhost:27017'
+		console.log(`Connecting to local MongoDB...`)
+
+	}
+
 	const client = new MongoClient(URL)
 
-	await client.connect()
+	while(true) {
+		try {
+			await client.connect()
+			console.log(`Connection successfull`)
+			break
+
+		} catch (err) {
+			console.log('connection error!!')
+			console.log(`${err}`)
+		}
+	}
+
 	const db = client.db('scholar-tracker')
 
 	APP.use((req, res, next) => {
