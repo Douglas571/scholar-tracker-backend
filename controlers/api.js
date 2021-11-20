@@ -1,19 +1,4 @@
 module.exports = {
-	addLevel: async (req, res) => {
-		const { db } = req.ctx
-
-		let { performanceLevel } = req.body
-
-		performanceLevel.id = Date.now()
-
-		db.collection('performance-levels').insertOne(JSON.parse(JSON.stringify(performanceLevel)))
-
-		res.json({
-			success: true,
-			performanceLevelAdded: performanceLevel
-		})
-	},
-
 	getLevels: async (req, res) => {
 		console.log('v2 GET /performance-levels')
 
@@ -35,6 +20,21 @@ module.exports = {
 		})
 	},
 
+	addLevel: async (req, res) => {
+		const { db } = req.ctx
+
+		let { performanceLevel } = req.body
+
+		performanceLevel.id = Date.now()
+
+		db.collection('performance-levels').insertOne(JSON.parse(JSON.stringify(performanceLevel)))
+
+		res.json({
+			success: true,
+			performanceLevelAdded: performanceLevel
+		})
+	},
+
 	deleteLevel: async (req, res) => {
 
 		let success
@@ -52,6 +52,20 @@ module.exports = {
 		res.json({
 			success
 		})	
+	},
+
+	getScholars: async(req, res) => {
+		let results
+
+		results = await req.ctx.db.collection('scholars').find({}).toArray()
+		console.group(`API - get Scholars`)
+		
+		console.log(`The scholars are: ${JSON.stringify(results, null, 4)}`)
+		
+		console.groupEnd()
+		
+
+		res.json({ scholars: results })
 	},
 
 	addScholar: async (req, res) => {
@@ -77,17 +91,15 @@ module.exports = {
 		}
 	},
 
-	getScholars: async(req, res) => {
-		let results
+	setScholar: async (req, res) => {
+		let success = false
+		let message = ''
 
-		results = await req.ctx.db.collection('scholars').find({}).toArray()
-		console.group(`API - get Scholars`)
-		
-		console.log(`The scholars are: ${JSON.stringify(results, null, 4)}`)
-		
-		console.groupEnd()
 		
 
-		res.json({ scholars: results })
+		res.json({
+			success,
+			message,
+		})
 	}
 }
