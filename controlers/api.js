@@ -22,17 +22,27 @@ module.exports = {
 
 	addLevel: async (req, res) => {
 		const { db } = req.ctx
-
 		let { performanceLevel } = req.body
 
-		performanceLevel.id = Date.now()
+		if (performanceLevel) {
+			performanceLevel.id = Date.now()
 
-		db.collection('performance-levels').insertOne(JSON.parse(JSON.stringify(performanceLevel)))
+			await db.collection('performance-levels').insertOne(JSON.parse(JSON.stringify(performanceLevel)))
+			const savedPerfLevel = await db.collection('performance-levels').findOne({id: performanceLevel.id})
+			savedPerfLevel._id = undefined
 
-		res.json({
-			success: true,
-			performanceLevelAdded: performanceLevel
-		})
+			res.json({
+				success: true,
+				performanceLevel: savedPerfLevel
+			})
+		} else {
+			res.json({
+				success: false,
+				message: "there's not any performance level"
+			})
+		}
+
+		
 	},
 
 	deleteLevel: async (req, res) => {
@@ -61,8 +71,9 @@ module.exports = {
 		console.group(`API - get Scholars`)
 		
 		console.log(`The scholars are: ${JSON.stringify(results, null, 4)}`)
-		
+
 		console.groupEnd()
+		results.forEach( scholar => scholar._id = undefined)
 		
 
 		res.json({ scholars: results })

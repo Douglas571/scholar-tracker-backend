@@ -10,62 +10,71 @@ describe('Testing /performance-levels endpoint', () => {
 	})
 
 	it('A common operation, insert multiple levels and read', async () => {
-		let levels = [
-			{
-				level: 1,
-				ranges: [
-					{
-						order: 1,
-						slp: {
-							bottom: 0,
-							top: 75,
-						},
-						percentage: {
-							sholar: 0,
-							manager: 30,
-							investor: 70,
-						}
+		let level = {
+			level: 1,
+			ranges: [
+				{
+					order: 1,
+					slp: {
+						bottom: 0,
+						top: 75,
 					},
-					{
-						order: 2,
-						slp: {
-							bottom: 75,
-							top: 130	
-						},
-						percentage: {
-							sholar: 20,
-							manager: 20,
-							investor: 60
-						}
+					percentage: {
+						sholar: 0,
+						manager: 30,
+						investor: 70,
 					}
-				]
-			},
+				},
+				{
+					order: 2,
+					slp: {
+						bottom: 75,
+						top: 130	
+					},
+					percentage: {
+						sholar: 20,
+						manager: 20,
+						investor: 60
+					}
+				}
+			]
+		}
 
-		]
-
+		//Testing an Error...
 		let res = await got.post(`${HOST}/v2/performance-levels`, {
 			json: {
-				performanceLevels: levels
+				//performanceLevels: levels
 			}
 		}).json()
 
+		expect(res).toEqual({
+			success: false,
+			message: "there's not any performance level"
+		})
+
+
+		//Rigth now, testing insertion...
+		res = await got.post(`${HOST}/v2/performance-levels`, {
+			json: {
+				performanceLevel: level
+			}
+		}).json()
 		expect(res.success).toEqual(true)
+		let resivedLevel = res.performanceLevel
 
-		let resivedLevels = res.data.performanceLevelsAdded
+		expect(resivedLevel.id).toBeDefined()
+		expect(resivedLevel.level).toBe(1)
 
-		expect(resivedLevels[0].id).toBeDefined()
-		expect(resivedLevels[0].level).toBe(1)
-
-		//----------------------------------------------
-
+		//Testing fetchin...
 		res = await got(`${HOST}/v2/performance-levels`).json()
+		expect(res.performanceLevels).toContainEqual(resivedLevel)
 
-		expect(res.data.performanceLevels).toContainEqual(resivedLevels[0])
-
-		res = await got.delete(`${HOST}/v2/performance-levels/${resivedLevels[0].id}`)
+		//Testing delete operation...
+		res = await got.delete(`${HOST}/v2/performance-levels/${resivedLevel.id}`)
 		let newResults = await got(`${HOST}/v2/performance-levels`).json()
 
-		expect(newResults.data.performanceLevels).not.toContainEqual(resivedLevels[0])
+		//verifiying...
+		expect(newResults.performanceLevels).not.toContainEqual(resivedLevel)
 
 	})
 
@@ -117,11 +126,11 @@ describe('Testing /scholars endpoint', () => {
 			}
 		})
 
-		res = await got(`${HOST}/v2/scholar`).json()
+		res = await got(`${HOST}/v2/scholars`).json()
 
 		let { scholars } = res
-		expect(res.success).toBe(true)
-		expect(scholars).toContain(scholar)
+		//expect(res.success).toBe(true)
+		expect(scholars).toContainEqual(scholar)
 
 
 	})
@@ -133,7 +142,6 @@ describe('Testing /scholars endpoint', () => {
 		await client.connect()
 		const db = client.db('scholar-tracker')
 		db.collection('scholars').deleteMany()
-
 	})
 })
 
