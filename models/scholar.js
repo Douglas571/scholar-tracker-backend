@@ -8,11 +8,15 @@ const scholarSchema = new mongoose.Schema({
 
   discord: String,
 
-  slp: Number,
+  slp: {
+    total: Number,
+    today: Number
+  },
+
   mmr: Number,
 
   history: [
-    { date: String, slp: Number }
+    { date: String, slp: Number, mmr: Number }
   ]
 
 });

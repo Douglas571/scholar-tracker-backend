@@ -83,7 +83,7 @@ describe('Testing /performance-levels endpoint', () => {
 		const client = new MongoClient(URL)
 
 		await client.connect()
-		const db = client.db('scholar-tracker')
+		const db = client.db('test')
 		db.collection('performance-levels').deleteMany()
 
 	})
@@ -140,7 +140,7 @@ describe('Testing /scholars endpoint', () => {
 		const client = new MongoClient(URL)
 
 		await client.connect()
-		const db = client.db('scholar-tracker')
+		const db = client.db('test')
 		db.collection('scholars').deleteMany()
 	})
 })

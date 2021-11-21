@@ -28,92 +28,7 @@ APP.get('/', (req, res) => {
 
 //------------------------------------------------------
 
-async function updateScholarsData() {
-	console.group('Index.js - updateScholarsData')
-	//crear una cadena de texto con todas las direcciones
-	let roninList = []
-
-	DATA.scholars.forEach((_, ronin) => {
-		roninList.push(ronin)
-	})
-
-	let roninStringChain = roninList.join(',')
-	console.log(roninStringChain)
-	//consultar la api
-
-	let { body } = await got(`https://game-api.axie.technology/api/v1/${roninStringChain}`)
-	let data = JSON.parse(body)
-	console.log(data)
-
-	console.log('end fetching')
-
-	//mapear el resultado y guardar en "Scholars"
-	for(let ronin in data) {
-		let scholar = DATA.scholars.get(ronin)
-		console.log(scholar)
-		let scholarOrigin = data[ronin]
-
-		scholar.gameName = scholarOrigin.name
-		scholar.slp = scholarOrigin['in_game_slp']
-		scholar.mmr = scholarOrigin.mmr
-		scholar.nextClaim = scholarOrigin['next_claim']
-
-		DATA.scholars.set(ronin, scholar)
-	}
-
-	console.log(DATA.scholars)
-
-	console.groupEnd()
-
-	calculatePayments()
-}
-
-function calculatePayments() {
-	//mapear cada uno de los becados
-	console.group('Index.js - calculatePayments')
-	console.log('prev scholars:')
-	console.log(DATA.scholars)
-
-	let newScholars = new Map()
-	DATA.scholars.forEach((scholar, ronin) => {
-		console.log('PREV scholar')
-		console.log(scholar)
-
-		scholar.slpToPay = {}
-
-		DATA.performanceLevels.forEach( level => {
-			let { slp } = scholar
-			if ((slp >= level.slp.bottom) && (slp < level.slp.top)) {
-				let slpToHimself = (slp * level.percentage.scholar) / 100
-				let slpToManager = (slp * level.percentage.manager) / 100
-				let slpToInv = (slp * level.percentage.investor) / 100
-
-				scholar.performance = level.level
-				scholar.percent = level.percentage.scholar
-
-				scholar.slpToPay = {
-					self: slpToHimself,
-					manager: slpToManager,
-					investor: slpToInv
-				}
-
-				console.log('total: ', (slpToHimself + slpToManager + slpToInv))
-			}
-		})
-
-		console.log('FINAL scholar')
-		console.log(scholar)
-		console.log()
-	})
-	//calcular pagos
-	//almacenar datos en "Scholars"
-	console.log('final scholars:')
-	console.log(DATA.scholars)
-}
-
-(async () => {
-
-
+let init = async () => {
 
 	let URL = ''
 	if (['dev:online', 'production'].includes(process.env.NODE_ENV)) {
@@ -140,7 +55,15 @@ function calculatePayments() {
 		}
 	}
 
-	const db = client.db('scholar-tracker')
+	
+	let dbStr
+	if(['test'].includes(process.env.NODE_ENV)) {
+		dbStr = 'test'
+	} else {
+		dbStr = 'scholar-tracker'
+	}
+
+	let db = client.db(dbStr) 
 
 	APP.use((req, res, next) => {
 		console.log('seting context')
@@ -159,5 +82,8 @@ function calculatePayments() {
 	})
 
 
-	//updateScholarsData()
-})();
+	//Ejecutar cada 4 horas
+		//updateScholarsData()
+}
+
+init()
