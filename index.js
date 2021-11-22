@@ -13,6 +13,7 @@ const got = require('got')
 
 const DATA = require('./data')
 const ROUTER_API_V2 = require('./routers/api-v2')
+const libs = require('./libs')
 
 const APP = express()
 
@@ -63,6 +64,7 @@ let init = async () => {
 		dbStr = 'scholar-tracker'
 	}
 
+	console.log(`Using "${dbStr}" db`)
 	let db = client.db(dbStr) 
 
 	APP.use((req, res, next) => {
@@ -77,13 +79,37 @@ let init = async () => {
 
 	APP.use('/v2', ROUTER_API_V2)
 
-	APP.listen(PORT, (err) => {
-		console.log(`Listing in: localhost:${PORT}`)
-	})
+	await APP.listen(PORT)
+	console.log(`Listing in: localhost:${PORT}`)
 
 
 	//Ejecutar cada 4 horas
 		//updateScholarsData()
+	console.group(`MAIN - Updated scholars`)
+
+	try {
+		let scholars = await db.collection('scholars').find({}).toArray()
+		console.log(`scholars: ${JSON.stringify(scholars, null, 4)}`)
+
+		let scholarsFetchedInfo = await libs.fetchScholarsData(scholars)
+		let performanceLevels = await db.collection('performance-levels').find({}).toArray()
+		let scholarsUpdatedInfo = libs.calculateScholarsPayments(scholarsFetchedInfo, performanceLevels)
+		
+		console.log(`final sholars updated info: ${JSON.stringify(scholarsUpdatedInfo, null, 4)}`)
+		
+		scholarsUpdatedInfo.forEach( async scholar => {
+			let result = await db.collection('scholars').updateOne({_id: scholar._id}, { '$set': scholar }, { upsert: true })
+			console.log(`the result is: ${JSON.stringify(result, null, 4)}`)
+		})
+
+	} catch (err) {
+		console.log(err)
+	}
+	
+	console.log(`Update finished...`)
+	console.groupEnd()	
+
+	//guardar los datos actualiados en la base de datos, collection scholars
 }
 
 init()

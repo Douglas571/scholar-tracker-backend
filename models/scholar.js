@@ -13,10 +13,13 @@ const scholarSchema = new mongoose.Schema({
     today: Number
   },
 
-  mmr: Number,
+  mmr: {
+    total: Number,
+    today: Number
+  }
 
   history: [
-    { date: String, slp: Number, mmr: Number }
+    { axie_timestamp: Number, slp: Number, mmr: Number }
   ]
 
 });

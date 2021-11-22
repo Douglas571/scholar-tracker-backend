@@ -1,3 +1,5 @@
+const got = require('got')
+
 /*
 	Necesito:
 	  - función para extraer datos de la Ronin Chain
@@ -8,43 +10,66 @@
 //función para extraer datos de la Ronin Chain
 //Retorna: Mapa: ronin -> scholar
 //Recive: Mapa: ronin -> scholar
-async function updateScholarsData(scholars) {
+exports.fetchScholarsData = async (scholars) => {
+	let scholarsFetchedInfo = []
+
 	console.group('Libs - updateScholarsData')
 
 	//crear una cadena de texto con todas las ronin
-	let roninsStr = scholars.forEach( sch => sch.ronin ).join(',')
+	
+	
+	let roninsStr = scholars.map( sch => sch.ronin ).join(',')
 	console.log(roninsStr)
 	
 	//consultar la api
+	
 	let { body } = await got(`https://game-api.axie.technology/api/v1/${roninsStr}`)
 	let data = JSON.parse(body)
 	console.log(`The resived data is: ${JSON.stringify(data, null, 4)}`)
-	console.log('end fetching')
+	console.log('end fetching')	
 
 	//mapear el resultado y guardar en "Scholars"
 
-	/*
 	for(let ronin in data) {
-		let scholar = DATA.scholars.get(ronin)
-		console.log(scholar)
-		let scholarOrigin = data[ronin]
+		let scholar = scholars.find( sch => sch.ronin === ronin)
+		//console.log(scholar)
+		/*
+			let scholarOrigin = data[ronin]
 
-		scholar.gameName = scholarOrigin.name
-		scholar.slp = scholarOrigin['in_game_slp']
-		scholar.mmr = scholarOrigin.mmr
-		scholar.nextClaim = scholarOrigin['next_claim']
+			scholar.gameName = scholarOrigin.name
+			scholar.slp = scholarOrigin['in_game_slp']
+			scholar.mmr = scholarOrigin.mmr
+			scholar.nextClaim = scholarOrigin
+		*/
 
-		DATA.scholars.set(ronin, scholar)
+		scholar.history = scholar.history || []
+		scholar.slp = scholar.slp || {}
+		scholar.mmr = scholar.mmr || {}
+		console.log(`the history length is: ${JSON.stringify(scholar.history.length, null, 4)}`)
+
+		let lastIdx = scholar.history.length - 1
+		
+		let newHistoryEntry = { 
+			axie_timestamp: data[ronin]["cache_last_updated"],
+			slp: data[ronin]["in_game_slp"],
+			mmr: data[ronin]["mmr"]
+		}
+
+		if ((scholar.history.length > 0) && (scholar.history[lastIdx] !== newHistoryEntry)) {
+			scholar.history.push(newHistoryEntry)
+		}
+
+		scholar.slp.total = data[ronin]["in_game_slp"]
+		scholar.mmr.total = data[ronin]["mmr"]
+		scholar.next_claim = data[ronin]['next_claim']
+
+		scholarsFetchedInfo.push(scholar)
 	}
-	*/
-
-	
-
-	console.log(DATA.scholars)
 
 	console.groupEnd()
 
 	//Retornar array de scholars
+	return scholarsFetchedInfo
 }
 
 //función para actualizar historial de slp y mmr
@@ -52,46 +77,28 @@ async function updateScholarsData(scholars) {
 //Resive: Mapa: ronin -> info
 
 //Resive una lista de becados y retorna sus datos calculados
-function calculatePayments() {
-	//mapear cada uno de los becados
-	console.group('Index.js - calculatePayments')
-	console.log('prev scholars:')
-	console.log(DATA.scholars)
+exports.calculateScholarsPayments = (scholars, performanceLevels) => {
+	let scholarsUpdatedInfo = []
+	console.group('Libs - calculate payments')
 
-	let newScholars = new Map()
-	DATA.scholars.forEach((scholar, ronin) => {
-		console.log('PREV scholar')
-		console.log(scholar)
+	console.log(`the scholars are: ${JSON.stringify(scholars, null, 4)}`)
+	console.log(`the performanceLevels are: ${JSON.stringify(performanceLevels, null, 4)}`)
 
-		scholar.slpToPay = {}
+	scholars.forEach( sch => {
+		let schUpdatedInfo = JSON.parse(JSON.stringify(sch))
 
-		DATA.performanceLevels.forEach( level => {
-			let { slp } = scholar
-			if ((slp >= level.slp.bottom) && (slp < level.slp.top)) {
-				let slpToHimself = (slp * level.percentage.scholar) / 100
-				let slpToManager = (slp * level.percentage.manager) / 100
-				let slpToInv = (slp * level.percentage.investor) / 100
+		if (schUpdatedInfo.history.length > 1) {
 
-				scholar.performance = level.level
-				scholar.percent = level.percentage.scholar
+		} else {
+			console.log(`Insuficient history entries for pay calculation :(`)
+		}
 
-				scholar.slpToPay = {
-					self: slpToHimself,
-					manager: slpToManager,
-					investor: slpToInv
-				}
-
-				console.log('total: ', (slpToHimself + slpToManager + slpToInv))
-			}
-		})
-
-		console.log('FINAL scholar')
-		console.log(scholar)
-		console.log()
+		scholarsUpdatedInfo.push(schUpdatedInfo)
 	})
-	//calcular pagos
-	//almacenar datos en "Scholars"
-	console.log('final scholars:')
-	console.log(DATA.scholars)
+
+	console.groupEnd()
+
+	return scholarsUpdatedInfo
+
 }
 
