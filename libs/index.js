@@ -55,9 +55,12 @@ exports.fetchScholarsData = async (scholars) => {
 			mmr: data[ronin]["mmr"]
 		}
 
-		if ((scholar.history.length > 0) && (scholar.history[lastIdx] !== newHistoryEntry)) {
-			scholar.history.push(newHistoryEntry)
+		if ((scholar.history.length == 0) || ((scholar.history[lastIdx]["axie_timestamp"] !== newHistoryEntry["axie_timestamp"]))) {
+			scholar.history.push(newHistoryEntry)			
 		}
+
+		// si el historila no tiene datos, agregar entrada
+		//
 
 		scholar.slp.total = data[ronin]["in_game_slp"]
 		scholar.mmr.total = data[ronin]["mmr"]
