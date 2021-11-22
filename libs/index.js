@@ -10,6 +10,9 @@ const got = require('got')
 //función para extraer datos de la Ronin Chain
 //Retorna: Mapa: ronin -> scholar
 //Recive: Mapa: ronin -> scholar
+
+// regex for validate ronins 
+// /(?<start>((0x)|(ronin:)|()))(?<addrs>([(a-f)(0-9)]{2}){20})/gm
 exports.fetchScholarsData = async (scholars) => {
 	let scholarsFetchedInfo = []
 
@@ -46,8 +49,6 @@ exports.fetchScholarsData = async (scholars) => {
 		scholar.slp = scholar.slp || {}
 		scholar.mmr = scholar.mmr || {}
 		console.log(`the history length is: ${JSON.stringify(scholar.history.length, null, 4)}`)
-
-		let lastIdx = scholar.history.length - 1
 		
 		let newHistoryEntry = { 
 			axie_timestamp: data[ronin]["cache_last_updated"],
@@ -55,21 +56,24 @@ exports.fetchScholarsData = async (scholars) => {
 			mmr: data[ronin]["mmr"]
 		}
 
+		let lastIdx = scholar.history.length - 1
 		if ((scholar.history.length == 0) || ((scholar.history[lastIdx]["axie_timestamp"] !== newHistoryEntry["axie_timestamp"]))) {
 			scholar.history.push(newHistoryEntry)			
 		}
 
-		// si el historila no tiene datos, agregar entrada
-		//
-
 		scholar.slp.total = data[ronin]["in_game_slp"]
 		scholar.mmr.total = data[ronin]["mmr"]
+		scholar.last_claim = data[ronin]['last_claim']
 		scholar.next_claim = data[ronin]['next_claim']
 
 		if (scholar.history.length > 1) {
-			console.log(`content`)
-			let last = scholar.history[lastIdx]
-			let preLast = scholar.history[lastIdx - 1]
+			console.log(`scholar.history.length: ${scholar.history.length}`)
+			console.log(`scholar.history: ${JSON.stringify(scholar.history, null, 4)}`)
+			console.log('last index: ', lastIdx)
+
+			const newLastIdx = scholar.history.length - 1
+			let last = scholar.history[newLastIdx]
+			let preLast = scholar.history[newLastIdx - 1]
 
 
 			console.log(`last:${JSON.stringify(last, null, 4)} - pre${JSON.stringify(preLast, null, 4)}`)
