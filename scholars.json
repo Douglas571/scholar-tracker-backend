@@ -1,0 +1,47 @@
+[
+    {
+        "name": "María",
+        "ronin": "0xaf972caf000306230f3e482bb408a0d488fd7676",
+        "history": [
+            {
+                "axie_timestamp": 1637576533825,
+                "str": "22 November 2021 10:22:13.825",
+                "slp": 212,
+                "mmr": 1078
+            },
+            {
+                "axie_timestamp": 1637588370287,
+                "str": "22 November 2021 13:39:30.287",
+                "slp": 212,
+                "mmr": 1078
+            }
+        ],
+        "slp": {
+            "total": 212,
+            "today": 0
+        },
+        "mmr": {
+            "total": 1078,
+            "today": 0
+        },
+        "next_claim": 1637646684
+    },
+    {
+        "name": "Top #1",
+        "ronin": "0xfbd406d3c61e21916f6ed28a7376848b8b4533be",
+        "history": [
+            {
+                "axie_timestamp": 1637582568571,
+                "slp": 4027,
+                "mmr": 2087
+            }
+        ],
+        "slp": {
+            "total": 4027
+        },
+        "mmr": {
+            "total": 2087
+        },
+        "next_claim": 1637323591
+    }
+]

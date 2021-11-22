@@ -66,6 +66,17 @@ exports.fetchScholarsData = async (scholars) => {
 		scholar.mmr.total = data[ronin]["mmr"]
 		scholar.next_claim = data[ronin]['next_claim']
 
+		if (scholar.history.length > 1) {
+			console.log(`content`)
+			let last = scholar.history[lastIdx]
+			let preLast = scholar.history[lastIdx - 1]
+
+
+			console.log(`last:${JSON.stringify(last, null, 4)} - pre${JSON.stringify(preLast, null, 4)}`)
+			scholar.slp.today = last.slp - preLast.slp
+			scholar.mmr.today = last.mmr - preLast.mmr
+		}
+
 		scholarsFetchedInfo.push(scholar)
 	}
 
