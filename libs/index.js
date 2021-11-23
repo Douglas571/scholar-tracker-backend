@@ -66,6 +66,9 @@ exports.fetchScholarsData = async (scholars) => {
 		scholar.last_claim = data[ronin]['last_claim']
 		scholar.next_claim = data[ronin]['next_claim']
 
+		//TO-DO: Calculo del slp generado en el día
+
+		//calcular el slp en un día, en torno al servidor principal
 		if (scholar.history.length > 1) {
 			console.log(`scholar.history.length: ${scholar.history.length}`)
 			console.log(`scholar.history: ${JSON.stringify(scholar.history, null, 4)}`)
@@ -74,8 +77,7 @@ exports.fetchScholarsData = async (scholars) => {
 			const newLastIdx = scholar.history.length - 1
 			let last = scholar.history[newLastIdx]
 			let preLast = scholar.history[newLastIdx - 1]
-
-
+		
 			console.log(`last:${JSON.stringify(last, null, 4)} - pre${JSON.stringify(preLast, null, 4)}`)
 			scholar.slp.today = last.slp - preLast.slp
 			scholar.mmr.today = last.mmr - preLast.mmr
