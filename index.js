@@ -22,12 +22,42 @@ let PORT = process.env.PORT || 3001
 APP.use(bodyParser.json())
 APP.use(cors())
 
+APP.get('/updt', async (req, res) => {
+	try {
+		await updateScholarsData(req.ctx.db)	
+	} catch (err) {
+		res.end(JSON.stringify(err, null, 4))
+	}
+	
+})
+
 APP.get('/', (req, res) => {
 	res.end(`<h1>Hello World!</h1>`)
 })
 
 
 //------------------------------------------------------
+
+async function updateScholarsData(db) {
+	try {
+		let scholars = await db.collection('scholars').find({}).toArray()
+		console.log(`scholars: ${JSON.stringify(scholars, null, 4)}`)
+
+		let scholarsFetchedInfo = await libs.fetchScholarsData(scholars)
+		let performanceLevels = await db.collection('performance-levels').find({}).toArray()
+		let scholarsUpdatedInfo = libs.calculateScholarsPayments(scholarsFetchedInfo, performanceLevels)
+		
+		console.log(`final sholars updated info: ${JSON.stringify(scholarsUpdatedInfo, null, 4)}`)
+		
+		scholarsUpdatedInfo.forEach( async scholar => {
+			let result = await db.collection('scholars').updateOne({_id: scholar._id}, { '$set': scholar }, { upsert: true })
+			console.log(`the result is: ${JSON.stringify(result, null, 4)}`)
+		})
+
+	} catch (err) {
+		console.log(err)
+	}
+}
 
 let init = async () => {
 
@@ -87,24 +117,7 @@ let init = async () => {
 		//updateScholarsData()
 	console.group(`MAIN - Updated scholars`)
 
-	try {
-		let scholars = await db.collection('scholars').find({}).toArray()
-		console.log(`scholars: ${JSON.stringify(scholars, null, 4)}`)
-
-		let scholarsFetchedInfo = await libs.fetchScholarsData(scholars)
-		let performanceLevels = await db.collection('performance-levels').find({}).toArray()
-		let scholarsUpdatedInfo = libs.calculateScholarsPayments(scholarsFetchedInfo, performanceLevels)
-		
-		console.log(`final sholars updated info: ${JSON.stringify(scholarsUpdatedInfo, null, 4)}`)
-		
-		scholarsUpdatedInfo.forEach( async scholar => {
-			let result = await db.collection('scholars').updateOne({_id: scholar._id}, { '$set': scholar }, { upsert: true })
-			console.log(`the result is: ${JSON.stringify(result, null, 4)}`)
-		})
-
-	} catch (err) {
-		console.log(err)
-	}
+	await updateScholarsData(db)
 	
 	console.log(`Update finished...`)
 	console.groupEnd()	
