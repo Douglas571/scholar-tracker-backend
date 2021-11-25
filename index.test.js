@@ -5,7 +5,7 @@ const { MongoClient } = require('mongodb')
 const HOST = 'http://localhost:4000'
 const DB = 'scholar-tracker'
 
-describe('Testing /performance-levels endpoint', () => {
+describe.skip('Testing /performance-levels endpoint', () => {
 	beforeAll(() => {
 
 	})
@@ -90,7 +90,7 @@ describe('Testing /performance-levels endpoint', () => {
 	})
 })
 
-describe('Testing /scholars endpoint', () => {
+describe.skip('Testing /scholars endpoint', () => {
 	it('A common operation, create, get and delete a scholar', async () => {
 		let scholar = {
 			ronin: '0x000000',

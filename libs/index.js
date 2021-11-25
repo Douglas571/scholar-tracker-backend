@@ -13,16 +13,24 @@ const got = require('got')
 
 // regex for validate ronins 
 // /(?<start>((0x)|(ronin:)|()))(?<addrs>([(a-f)(0-9)]{2}){20})/gm
-exports.fetchScholarsData = async (scholars) => {
-	let scholarsFetchedInfo = []
+exports.updateScholars = async (scholars) => {
+	let fetchedData = await this.fetchScholarsData(scholars)
+	let upDt = this.setNewData(scholars, fetchedData)
+	console.log(`upDt: ${JSON.stringify(upDt, null, 4)}`)
+	upDt = this.calculateScholarsPayments(upDt)
 
+	return upDt
+}
+
+exports.fetchScholarsData = async (scholars) => {
 	console.group('Libs - updateScholarsData')
 
 	console.log(`${JSON.stringify(scholars, null, 4)}`)
 	//crear una cadena de texto con todas las ronin
 	
 	
-	let roninsStr = scholars.map( sch => sch.ronin ).join(',')
+	let roninList = scholars.map( sch => sch.ronin )
+	const roninsStr = roninList.join(',')
 	console.log(roninsStr)
 	
 	//consultar la api
@@ -33,21 +41,59 @@ exports.fetchScholarsData = async (scholars) => {
 	console.log('end fetching')	
 
 
-	//mapear el resultado y guardar en "Scholars"
+	console.groupEnd()
+	let fetchedData = {}
+
+	if (thereMultipleStats(data)) {
+		console.log(`there are mulitple stats: ${thereMultipleStats(newData)}`)
+		fetchedData = data
+
+	} else {
+
+		fetchedData[roninList[0]] = data
+		
+	}
+
+	return fetchedData
+}
+
+function thereMultipleStats(resived_API_info) {
+	return !(resived_API_info.success)
+}
+
+function entryAlredyExist(scholar, newHistoryEntry) {
+			return ((scholar.history[lastIdx]["axie_timestamp"] !== newHistoryEntry["axie_timestamp"]))
+}
+
+function hasHistory(scholar) {
+	return (scholar.history.length == 0)
+}
+
+function calculateSLPEarnedToday(scholar) {
+	if (scholar.history.length > 1) {
+		console.log(`scholar.history.length: ${scholar.history.length}`)
+		console.log(`scholar.history: ${JSON.stringify(scholar.history, null, 4)}`)
+		console.log('last index: ', lastIdx)
+
+		const newLastIdx = scholar.history.length - 1
+		let last = scholar.history[newLastIdx]
+		let preLast = scholar.history[newLastIdx - 1]
+	
+		console.log(`last:${JSON.stringify(last, null, 4)} - pre${JSON.stringify(preLast, null, 4)}`)
+		scholar.slp.today = last.slp - preLast.slp
+		scholar.mmr.today = last.mmr - preLast.mmr
+	}
+
+	return scholar
+}
 
 
-	for(let ronin in data) {
-		//asegurar cuand hay uno solo
+exports.setNewData = (scholars, newData) => {
+	let updatedScholars = []
+
+	for(let ronin in newData) {
 		let scholar = scholars.find( sch => sch.ronin === ronin)
 		console.log(`the scholar of ronin="${ronin}" is: ${JSON.stringify(scholar, null, 4)}"`)
-		/*
-			let scholarOrigin = data[ronin]
-
-			scholar.gameName = scholarOrigin.name
-			scholar.slp = scholarOrigin['in_game_slp']
-			scholar.mmr = scholarOrigin.mmr
-			scholar.nextClaim = scholarOrigin
-		*/
 
 		scholar.history = scholar.history || []
 		scholar.slp = scholar.slp || {}
@@ -55,45 +101,34 @@ exports.fetchScholarsData = async (scholars) => {
 		console.log(`the history length is: ${JSON.stringify(scholar.history.length, null, 4)}`)
 		
 		let newHistoryEntry = { 
-			axie_timestamp: data[ronin]["cache_last_updated"],
-			slp: data[ronin]["in_game_slp"],
-			mmr: data[ronin]["mmr"]
+			axie_timestamp: newData[ronin]["cache_last_updated"],
+			slp: newData[ronin]["in_game_slp"],
+			mmr: newData[ronin]["mmr"]
 		}
 
+		//Determinar si colocar la nueva entrada
 		let lastIdx = scholar.history.length - 1
-		if ((scholar.history.length == 0) || ((scholar.history[lastIdx]["axie_timestamp"] !== newHistoryEntry["axie_timestamp"]))) {
+
+		if (hasHistory(scholar) || 
+			entryAlredyExist(scholar, newHistoryEntry)) {
 			scholar.history.push(newHistoryEntry)			
 		}
 
-		scholar.slp.total = data[ronin]["in_game_slp"]
-		scholar.mmr.total = data[ronin]["mmr"]
-		scholar.last_claim = data[ronin]['last_claim']
-		scholar.next_claim = data[ronin]['next_claim']
-
-		//TO-DO: Calculo del slp generado en el día
+		scholar.slp.total = newData[ronin]["in_game_slp"]
+		scholar.mmr.total = newData[ronin]["mmr"]
+		scholar.last_claim = newData[ronin]['last_claim']
+		scholar.next_claim = newData[ronin]['next_claim']
 
 		//calcular el slp en un día, en torno al servidor principal
-		if (scholar.history.length > 1) {
-			console.log(`scholar.history.length: ${scholar.history.length}`)
-			console.log(`scholar.history: ${JSON.stringify(scholar.history, null, 4)}`)
-			console.log('last index: ', lastIdx)
+		scholar = calculateSLPEarnedToday(scholar)
 
-			const newLastIdx = scholar.history.length - 1
-			let last = scholar.history[newLastIdx]
-			let preLast = scholar.history[newLastIdx - 1]
-		
-			console.log(`last:${JSON.stringify(last, null, 4)} - pre${JSON.stringify(preLast, null, 4)}`)
-			scholar.slp.today = last.slp - preLast.slp
-			scholar.mmr.today = last.mmr - preLast.mmr
-		}
-
-		scholarsFetchedInfo.push(scholar)
-	}
+		updatedScholars.push(scholar)
+	}		
 
 	console.groupEnd()
 
 	//Retornar array de scholars
-	return scholarsFetchedInfo
+	return updatedScholars
 }
 
 //función para actualizar historial de slp y mmr
