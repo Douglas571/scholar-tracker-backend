@@ -1,9 +1,3 @@
-// scholar-tracker-backend
-
-// scholar-tracker-frontend
-// heroku create scholar-tracker-frontend --buildpack mars/create-react-app
-
-
 //require('dotenv').config()
 const { MongoClient } = require('mongodb')
 const express = require('express')
@@ -124,16 +118,14 @@ let init = async () => {
 	console.log(`Listing in: localhost:${PORT}`)
 
 
-	//Ejecutar cada 4 horas
-		//updateScholarsData()
+	// Ejecutar cada 4 horas
+		// updateScholarsData()
 	console.group(`MAIN - Updated scholars`)
 
 	await updateScholarsData(db)
 	
 	console.log(`Update finished...`)
 	console.groupEnd()	
-
-	//guardar los datos actualiados en la base de datos, collection scholars
 }
 
 init()
