@@ -3,6 +3,7 @@ const got = require('got')
 const { MongoClient } = require('mongodb')
 
 const HOST = 'http://localhost:4000'
+const DB = 'scholar-tracker'
 
 describe('Testing /performance-levels endpoint', () => {
 	beforeAll(() => {
@@ -83,7 +84,7 @@ describe('Testing /performance-levels endpoint', () => {
 		const client = new MongoClient(URL)
 
 		await client.connect()
-		const db = client.db('test')
+		const db = client.db(DB)
 		db.collection('performance-levels').deleteMany()
 
 	})
@@ -131,6 +132,30 @@ describe('Testing /scholars endpoint', () => {
 		let { scholars } = res
 		//expect(res.success).toBe(true)
 		expect(scholars).toContainEqual(scholar)
+		console.log(scholars)
+
+		res = await got.delete(`${HOST}/v2/scholars/${scholar.ronin}`).json()
+		expect(res.scholar).toMatchObject(scholar)
+
+		res = await got(`${HOST}/v2/scholars`).json()
+		expect(res.scholars).not.toContain(scholar)
+
+		res = await got.put(`${HOST}/v2/scholars/${scholar2.ronin}`, {
+			json: {
+				scholar: {
+					name: 'romina',
+					discord: 'romina@7384'
+				}
+			}
+		}).json()
+		
+		const newScholar = res.scholar
+
+		expect(newScholar.name).toBe('romina')
+		expect(newScholar.discord).toBe('romina@7384')
+
+		res = await got(`${HOST}/v2/scholars`).json()
+		expect(res.scholars).toContainEqual(newScholar)
 
 
 	})
@@ -140,7 +165,7 @@ describe('Testing /scholars endpoint', () => {
 		const client = new MongoClient(URL)
 
 		await client.connect()
-		const db = client.db('test')
+		const db = client.db(DB)
 		db.collection('scholars').deleteMany()
 	})
 })

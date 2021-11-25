@@ -1,3 +1,18 @@
+async function findScholar(db, filter, options) {
+	options = { projection: { _id: 0 }}
+	let scholar = await db.collection('scholars')
+						  .findOne(filter, options)
+	return scholar
+}
+
+async function getAllScholars(db, filter={}, options={}) {
+	options = options || { projection: { _id: 0 }}
+	results = await db.collection('scholars')
+					  .find(filter, options)
+				   	  .toArray()
+	return results
+}
+
 module.exports = {
 	getLevels: async (req, res) => {
 		console.log('v2 GET /performance-levels')
@@ -65,9 +80,9 @@ module.exports = {
 	},
 
 	getScholars: async(req, res) => {
-		let results
+		const { db } = req.ctx
+		let results = await getAllScholars(db)
 
-		results = await req.ctx.db.collection('scholars').find({}).toArray()
 		console.group(`API - get Scholars`)
 		
 		console.log(`The scholars are: ${JSON.stringify(results, null, 4)}`)
@@ -108,14 +123,78 @@ module.exports = {
 	},
 
 	setScholar: async (req, res) => {
-		let success = false
-		let message = ''
+		const ronin = req.params.ronin
+		const newData = req.body.scholar
+		const { db } = req.ctx
 
+		//TO-DO: Validate data		
+
+		console.group(`API - set scholar`)
 		
+		try {
+			//optener el becado
+			let filter = { ronin }
+			let scholar = await findScholar(db, filter)
+			console.log(`the scholar is: ${JSON.stringify(scholar, null, 4)}`)
 
-		res.json({
-			success,
-			message,
-		})
+			//unir la info de los becados
+			scholar = {...scholar, ...newData}
+
+			console.log(`now, the scholar is: ${JSON.stringify(scholar, null, 4)}`)
+
+			//guardar becado
+			const result = await db.collection('scholars').updateOne(
+				{ ronin: scholar.ronin },
+				{ $set: scholar })
+
+			//enviar json
+			res.json({
+				success: true,
+				scholar
+			})
+
+		} catch (err) {
+			console.log(err)
+			res.json({
+				success: false,
+				msg: err
+			})
+		}	
+		
+		console.groupEnd()
+		
+	},
+
+	deleteScholar: async (req, res) => {
+		const ronin = req.params.ronin
+		const { db } = req.ctx
+
+		//TO-DO: Verify that is valid ronin
+
+		console.group(`API - delete scholar`)
+		
+		try {
+
+			const scholar = await findScholar(db, { ronin })
+			const result = await db.collection('scholars').deleteOne({ ronin: scholar.ronin })
+
+			console.log(`The result: ${JSON.stringify(result, null, 4)}`)
+			
+			res.json({
+				success: true,
+				scholar
+			})
+
+		} catch (err) {
+			console.log(err)
+			res.json({
+				success: false,
+				msg: err,
+				scholar: {}
+			})
+		}
+		
+		console.groupEnd()
+
 	}
 }

@@ -6,8 +6,9 @@
   "scripts": {
     "start": "node index.js",
     "test": "jest",
-    "dev": "nodemon -r dotenv/config index.js dotenv_config_path=.env",
-    "test:w": "jest --watch --runInBand"
+    "dev": "set NODE_ENV=dev nodemon -r dotenv/config index.js dotenv_config_path=.env",
+    "dev:test": "set NODE_ENV=test && nodemon -r dotenv/config index.js dotenv_config_path=.env",
+    "test:w": "jest --watch --runInBand --detectOpenHandles"
   },
   "author": "Douglas Socorro",
   "license": "MIT",
