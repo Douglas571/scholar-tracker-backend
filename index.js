@@ -23,11 +23,17 @@ APP.use(bodyParser.json())
 APP.use(cors())
 
 APP.get('/updt', async (req, res) => {
+	console.group(`APP - route: update`)
+	
 	try {
 		await updateScholarsData(req.ctx.db)	
+		res.json({ success: true })
 	} catch (err) {
 		res.end(JSON.stringify(err, null, 4))
 	}
+	
+	console.groupEnd()
+	
 	
 })
 
@@ -39,6 +45,8 @@ APP.get('/', (req, res) => {
 //------------------------------------------------------
 
 async function updateScholarsData(db) {
+	console.group(`APP - updating scholars data`)
+	
 	try {
 		let scholars = await db.collection('scholars').find({}).toArray()
 		console.log(`scholars: ${JSON.stringify(scholars, null, 4)}`)
@@ -57,6 +65,9 @@ async function updateScholarsData(db) {
 	} catch (err) {
 		console.log(err)
 	}
+	
+	console.groupEnd()
+	
 }
 
 let init = async () => {

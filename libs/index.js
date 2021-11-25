@@ -18,6 +18,7 @@ exports.fetchScholarsData = async (scholars) => {
 
 	console.group('Libs - updateScholarsData')
 
+	console.log(`${JSON.stringify(scholars, null, 4)}`)
 	//crear una cadena de texto con todas las ronin
 	
 	
@@ -31,11 +32,14 @@ exports.fetchScholarsData = async (scholars) => {
 	console.log(`The resived data is: ${JSON.stringify(data, null, 4)}`)
 	console.log('end fetching')	
 
+
 	//mapear el resultado y guardar en "Scholars"
 
+
 	for(let ronin in data) {
+		//asegurar cuand hay uno solo
 		let scholar = scholars.find( sch => sch.ronin === ronin)
-		//console.log(scholar)
+		console.log(`the scholar of ronin="${ronin}" is: ${JSON.stringify(scholar, null, 4)}"`)
 		/*
 			let scholarOrigin = data[ronin]
 
