@@ -13,19 +13,19 @@ const got = require('got')
 
 // regex for validate ronins 
 // /(?<start>((0x)|(ronin:)|()))(?<addrs>([(a-f)(0-9)]{2}){20})/gm
-exports.updateScholars = async (scholars) => {
+exports.updateScholars = async (scholars, perfmcLvls={}) => {
 	let fetchedData = await this.fetchScholarsData(scholars)
 	let upDt = this.setNewData(scholars, fetchedData)
 	console.log(`upDt: ${JSON.stringify(upDt, null, 4)}`)
-	upDt = this.calculateScholarsPayments(upDt)
+	upDt = this.calculateScholarsPayments(upDt, perfmcLvls)
 
 	return upDt
 }
 
 exports.fetchScholarsData = async (scholars) => {
-	console.group('Libs - updateScholarsData')
+	console.group('Libs - fetching data')
 
-	console.log(`${JSON.stringify(scholars, null, 4)}`)
+	//console.log(`${JSON.stringify(scholars, null, 4)}`)
 	//crear una cadena de texto con todas las ronin
 	
 	
@@ -35,6 +35,7 @@ exports.fetchScholarsData = async (scholars) => {
 	
 	//consultar la api
 	
+	console.log(`start fetching...`)
 	let { body } = await got(`https://game-api.axie.technology/api/v1/${roninsStr}`)
 	let data = JSON.parse(body)
 	console.log(`The resived data is: ${JSON.stringify(data, null, 4)}`)
@@ -45,7 +46,7 @@ exports.fetchScholarsData = async (scholars) => {
 	let fetchedData = {}
 
 	if (thereMultipleStats(data)) {
-		console.log(`there are mulitple stats: ${thereMultipleStats(newData)}`)
+		console.log(`there are mulitple stats: ${thereMultipleStats(data)}`)
 		fetchedData = data
 
 	} else {
@@ -62,7 +63,8 @@ function thereMultipleStats(resived_API_info) {
 }
 
 function entryAlredyExist(scholar, newHistoryEntry) {
-			return ((scholar.history[lastIdx]["axie_timestamp"] !== newHistoryEntry["axie_timestamp"]))
+	let lastIdx = scholar.history.length - 1
+	return ((scholar.history[lastIdx]["axie_timestamp"] !== newHistoryEntry["axie_timestamp"]))
 }
 
 function hasHistory(scholar) {
@@ -70,6 +72,7 @@ function hasHistory(scholar) {
 }
 
 function calculateSLPEarnedToday(scholar) {
+	let lastIdx = scholar.history.length - 1
 	if (scholar.history.length > 1) {
 		console.log(`scholar.history.length: ${scholar.history.length}`)
 		console.log(`scholar.history: ${JSON.stringify(scholar.history, null, 4)}`)
