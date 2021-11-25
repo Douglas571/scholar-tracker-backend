@@ -16,14 +16,12 @@ const got = require('got')
 exports.updateScholars = async (scholars, perfmcLvls={}) => {
 	let fetchedData = await this.fetchScholarsData(scholars)
 	let upDt = this.setNewData(scholars, fetchedData)
-	console.log(`upDt: ${JSON.stringify(upDt, null, 4)}`)
 	upDt = this.calculateScholarsPayments(upDt, perfmcLvls)
 
 	return upDt
 }
 
 exports.fetchScholarsData = async (scholars) => {
-	console.group('Libs - fetching data')
 
 	//console.log(`${JSON.stringify(scholars, null, 4)}`)
 	//crear una cadena de texto con todas las ronin
@@ -31,22 +29,14 @@ exports.fetchScholarsData = async (scholars) => {
 	
 	let roninList = scholars.map( sch => sch.ronin )
 	const roninsStr = roninList.join(',')
-	console.log(roninsStr)
 	
 	//consultar la api
-	
-	console.log(`start fetching...`)
 	let { body } = await got(`https://game-api.axie.technology/api/v1/${roninsStr}`)
 	let data = JSON.parse(body)
-	console.log(`The resived data is: ${JSON.stringify(data, null, 4)}`)
-	console.log('end fetching')	
 
-
-	console.groupEnd()
 	let fetchedData = {}
 
 	if (thereMultipleStats(data)) {
-		console.log(`there are mulitple stats: ${thereMultipleStats(data)}`)
 		fetchedData = data
 
 	} else {
@@ -74,15 +64,11 @@ function hasHistory(scholar) {
 function calculateSLPEarnedToday(scholar) {
 	let lastIdx = scholar.history.length - 1
 	if (scholar.history.length > 1) {
-		console.log(`scholar.history.length: ${scholar.history.length}`)
-		console.log(`scholar.history: ${JSON.stringify(scholar.history, null, 4)}`)
-		console.log('last index: ', lastIdx)
 
 		const newLastIdx = scholar.history.length - 1
 		let last = scholar.history[newLastIdx]
 		let preLast = scholar.history[newLastIdx - 1]
 	
-		console.log(`last:${JSON.stringify(last, null, 4)} - pre${JSON.stringify(preLast, null, 4)}`)
 		scholar.slp.today = last.slp - preLast.slp
 		scholar.mmr.today = last.mmr - preLast.mmr
 	}
@@ -96,12 +82,10 @@ exports.setNewData = (scholars, newData) => {
 
 	for(let ronin in newData) {
 		let scholar = scholars.find( sch => sch.ronin === ronin)
-		console.log(`the scholar of ronin="${ronin}" is: ${JSON.stringify(scholar, null, 4)}"`)
 
 		scholar.history = scholar.history || []
 		scholar.slp = scholar.slp || {}
 		scholar.mmr = scholar.mmr || {}
-		console.log(`the history length is: ${JSON.stringify(scholar.history.length, null, 4)}`)
 		
 		let newHistoryEntry = { 
 			axie_timestamp: newData[ronin]["cache_last_updated"],
@@ -141,10 +125,6 @@ exports.setNewData = (scholars, newData) => {
 //Resive una lista de becados y retorna sus datos calculados
 exports.calculateScholarsPayments = (scholars, performanceLevels) => {
 	let scholarsUpdatedInfo = []
-	console.group('Libs - calculate payments')
-
-	console.log(`the scholars are: ${JSON.stringify(scholars, null, 4)}`)
-	console.log(`the performanceLevels are: ${JSON.stringify(performanceLevels, null, 4)}`)
 
 	scholars.forEach( sch => {
 		let schUpdatedInfo = JSON.parse(JSON.stringify(sch))
@@ -157,8 +137,6 @@ exports.calculateScholarsPayments = (scholars, performanceLevels) => {
 
 		scholarsUpdatedInfo.push(schUpdatedInfo)
 	})
-
-	console.groupEnd()
 
 	return scholarsUpdatedInfo
 
