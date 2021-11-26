@@ -16,23 +16,21 @@ const got = require('got')
 exports.updateScholars = async (scholars, perfmcLvls={}) => {
 	let fetchedData = await this.fetchScholarsData(scholars)
 	let upDt = this.setNewData(scholars, fetchedData)
-	upDt = this.calculateScholarsPayments(upDt, perfmcLvls)
+	//upDt = this.calculateScholarsPayments(upDt, perfmcLvls)
 
 	return upDt
 }
 
 exports.fetchScholarsData = async (scholars) => {
+	console.log('fetching data')
+	console.log(scholars)
 
-	//console.log(`${JSON.stringify(scholars, null, 4)}`)
-	//crear una cadena de texto con todas las ronin
-	
-	
 	let roninList = scholars.map( sch => sch.ronin )
 	const roninsStr = roninList.join(',')
 	
-	//consultar la api
-	let { body } = await got(`https://game-api.axie.technology/api/v1/${roninsStr}`)
-	let data = JSON.parse(body)
+	let data = await got(`https://game-api.axie.technology/api/v1/${roninsStr}`).json()
+	console.log('data')
+	console.log(data)
 
 	let fetchedData = {}
 
@@ -48,36 +46,9 @@ exports.fetchScholarsData = async (scholars) => {
 	return fetchedData
 }
 
-function thereMultipleStats(resived_API_info) {
-	return !(resived_API_info.success)
-}
-
-function entryAlredyExist(scholar, newHistoryEntry) {
-	let lastIdx = scholar.history.length - 1
-	return ((scholar.history[lastIdx]["axie_timestamp"] !== newHistoryEntry["axie_timestamp"]))
-}
-
-function hasHistory(scholar) {
-	return (scholar.history.length == 0)
-}
-
-function calculateSLPEarnedToday(scholar) {
-	let lastIdx = scholar.history.length - 1
-	if (scholar.history.length > 1) {
-
-		const newLastIdx = scholar.history.length - 1
-		let last = scholar.history[newLastIdx]
-		let preLast = scholar.history[newLastIdx - 1]
-	
-		scholar.slp.today = last.slp - preLast.slp
-		scholar.mmr.today = last.mmr - preLast.mmr
-	}
-
-	return scholar
-}
-
-
 exports.setNewData = (scholars, newData) => {
+	console.log("setting data")
+	console.log(scholars)
 	let updatedScholars = []
 
 	for(let ronin in newData) {
@@ -124,7 +95,12 @@ exports.setNewData = (scholars, newData) => {
 
 //Resive una lista de becados y retorna sus datos calculados
 exports.calculateScholarsPayments = (scholars, performanceLevels) => {
+	console.log('calc peyment')
+	console.log(scholars)
+
 	let scholarsUpdatedInfo = []
+
+	
 
 	scholars.forEach( sch => {
 		let schUpdatedInfo = JSON.parse(JSON.stringify(sch))
@@ -141,4 +117,35 @@ exports.calculateScholarsPayments = (scholars, performanceLevels) => {
 	return scholarsUpdatedInfo
 
 }
+
+function thereMultipleStats(resived_API_info) {
+	return !(resived_API_info.success)
+}
+
+function entryAlredyExist(scholar, newHistoryEntry) {
+	let lastIdx = scholar.history.length - 1
+	return ((scholar.history[lastIdx]["axie_timestamp"] !== newHistoryEntry["axie_timestamp"]))
+}
+
+function hasHistory(scholar) {
+	return (scholar.history.length == 0)
+}
+
+function calculateSLPEarnedToday(scholar) {
+	let lastIdx = scholar.history.length - 1
+	if (scholar.history.length > 1) {
+
+		const newLastIdx = scholar.history.length - 1
+		let last = scholar.history[newLastIdx]
+		let preLast = scholar.history[newLastIdx - 1]
+	
+		scholar.slp.today = last.slp - preLast.slp
+		scholar.mmr.today = last.mmr - preLast.mmr
+	}
+
+	return scholar
+}
+
+
+
 

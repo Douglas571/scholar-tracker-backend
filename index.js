@@ -14,19 +14,6 @@ const PORT = process.env.PORT || 3001
 APP.use(bodyParser.json())
 APP.use(cors())
 
-APP.get('/updt', async (req, res) => {
-  console.group('APP - route: update')
-
-  try {
-    await updateScholarsData(req.ctx.db)
-    res.json({ success: true })
-  } catch (err) {
-    res.end(JSON.stringify(err, null, 4))
-  }
-
-  console.groupEnd()
-})
-
 APP.get('/', (req, res) => {
   res.end('<h1>Hello World!</h1>')
 })
@@ -40,16 +27,16 @@ async function updateScholarsData (db) {
     const scholars = await db.collection('scholars').find({}).toArray()
     console.log(`scholars: ${JSON.stringify(scholars, null, 4)}`)
 
-    const scholarsFetchedInfo = await libs.fetchScholarsData(scholars)
-    const performanceLevels = await db.collection('performance-levels').find({}).toArray()
-    const scholarsUpdatedInfo = libs.calculateScholarsPayments(scholarsFetchedInfo, performanceLevels)
+    const perfmLvl = await db.collection('performance-levels').find({}).toArray()
+    let updatedScholars = await libs.updateScholars(scholars, perfmLvl)
 
-    console.log(`final sholars updated info: ${JSON.stringify(scholarsUpdatedInfo, null, 4)}`)
+    console.log(`final sholars updated info: ${JSON.stringify(updatedScholars, null, 4)}`)
 
-    scholarsUpdatedInfo.forEach(async scholar => {
+    updatedScholars.forEach(async scholar => {
       const result = await db.collection('scholars').updateOne({ _id: scholar._id }, { $set: scholar }, { upsert: true })
       console.log(`the result is: ${JSON.stringify(result, null, 4)}`)
     })
+    
   } catch (err) {
     console.log(err)
   }
@@ -100,18 +87,25 @@ const init = async () => {
     next()
   })
 
+  APP.get('/updt', async (req, res) => {
+	  console.group('APP - route: update')
+
+	  try {
+	    await updateScholarsData(req.ctx.db)
+	    res.json({ success: true })
+	  } catch (err) {
+	  	console.log(err)
+	    res.end(JSON.stringify(err, null, 4))
+	  }
+
+	  console.groupEnd()
+	})
+
   APP.use('/v2', ROUTER_API_V2)
 
   await APP.listen(PORT)
   console.log(`Listing in: localhost:${PORT}`)
 
-  // Ejecutar cada 4 horas
-  // updateScholarsData()
-  console.group('MAIN - Updated scholars')
-
-  await updateScholarsData(db)
-
-  console.log('Update finished...')
   console.groupEnd()
 }
 
