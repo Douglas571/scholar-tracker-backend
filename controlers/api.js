@@ -84,12 +84,8 @@ module.exports = {
 		let results = await getAllScholars(db)
 
 		console.group(`API - get Scholars`)
-		
-		console.log(`The scholars are: ${JSON.stringify(results, null, 4)}`)
 
 		console.groupEnd()
-		results.forEach( scholar => scholar._id = undefined)
-		
 
 		res.json({ scholars: results })
 	},
@@ -196,5 +192,42 @@ module.exports = {
 		
 		console.groupEnd()
 
+	},
+
+	markScholar: async (req, res) => {
+		const { db } = req.ctx
+		const { ronin } = req.params
+		const newEntry = req.body
+
+		// buscar el becado
+		const scholar = await findScholar(db, { ronin })
+
+		if (newEntry) {
+			// si mando una entrada, agregar entrada marcada
+			// TO-DO: Verificar nueva entrada
+			scholar.history.push(newEntry)
+
+		} else {
+			// si no, marcar la utlima entrada
+			const lastIndex = scholar.history.length - 1
+			scholar.history[lastIdx].endDay = true
+				
+		}
+		
+		try {
+			// actualizar becado
+			const result = await db.collection('scholars').updateOne({ ronin: shoclar.ronin }, { $set: scholar })
+
+			res.json({
+				success: true,
+				scholar
+			})
+
+		} catch (err) {
+			res.json({
+				success: false,
+				msg: err
+			})
+		}
 	}
 }

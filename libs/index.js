@@ -16,7 +16,7 @@ const got = require('got')
 exports.updateScholars = async (scholars, perfmcLvls={}) => {
 	let fetchedData = await this.fetchScholarsData(scholars)
 	let upDt = this.setNewData(scholars, fetchedData)
-	//upDt = this.calculateScholarsPayments(upDt, perfmcLvls)
+	upDt = this.calculateScholarsPayments(upDt, perfmcLvls)
 
 	return upDt
 }

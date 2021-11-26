@@ -25,18 +25,14 @@ async function updateScholarsData (db) {
 
   try {
     const scholars = await db.collection('scholars').find({}).toArray()
-    console.log(`scholars: ${JSON.stringify(scholars, null, 4)}`)
 
     const perfmLvl = await db.collection('performance-levels').find({}).toArray()
     let updatedScholars = await libs.updateScholars(scholars, perfmLvl)
 
-    console.log(`final sholars updated info: ${JSON.stringify(updatedScholars, null, 4)}`)
-
     updatedScholars.forEach(async scholar => {
-      const result = await db.collection('scholars').updateOne({ _id: scholar._id }, { $set: scholar }, { upsert: true })
-      console.log(`the result is: ${JSON.stringify(result, null, 4)}`)
+      const result = await db.collection('scholars').updateOne({ _id: scholar._id }, { $set: scholar })
     })
-    
+
   } catch (err) {
     console.log(err)
   }
