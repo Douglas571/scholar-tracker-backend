@@ -29,9 +29,13 @@ async function updateScholarsData (db) {
     const perfmLvl = await db.collection('performance-levels').find({}).toArray()
     let updatedScholars = await libs.updateScholars(scholars, perfmLvl)
 
-    updatedScholars.forEach(async scholar => {
-      const result = await db.collection('scholars').updateOne({ _id: scholar._id }, { $set: scholar })
-    })
+    for await (let scholar of updatedScholars) {
+      console.log('updating: ', scholar.name)
+      delete scholar._id
+      console.log(scholar._id)
+      const result = await db.collection('scholars').updateOne({ ronin: scholar.ronin }, { $set: scholar })
+      console.log(result)
+    }
 
   } catch (err) {
     console.log(err)
@@ -72,12 +76,15 @@ const init = async () => {
 
   console.log(`Using "${dbStr}" db`)
   const db = client.db(dbStr)
+  const scholars = db.collection('scholars')
+  scholars.createIndex({ ronin: 1 }, { unique: true })
 
   APP.use((req, res, next) => {
     console.log('seting context')
 
     req.ctx = {
-      db
+      db,
+      scholars
     }
 
     next()

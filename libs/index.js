@@ -28,7 +28,21 @@ exports.fetchScholarsData = async (scholars) => {
 	let roninList = scholars.map( sch => sch.ronin )
 	const roninsStr = roninList.join(',')
 	
-	let data = await got(`https://game-api.axie.technology/api/v1/${roninsStr}`).json()
+	let res = got(`https://game-api.axie.technology/api/v1/${roninsStr}`)
+	let data = {}
+
+	let timeoutID = setTimeout(() => {
+		console.log('req cancel!')
+		res.cancel()
+	}, 10 * 1000)
+
+	try {
+		data = await res.json()
+		clearTimeout(timeoutID)
+	} catch (err) {
+		console.log(err)
+	}
+
 	console.log('data')
 	console.log(data)
 

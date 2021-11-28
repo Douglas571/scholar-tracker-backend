@@ -85,6 +85,8 @@ module.exports = {
 
 		console.group(`API - get Scholars`)
 
+		console.log(results)
+
 		console.groupEnd()
 
 		res.json({ scholars: results })
@@ -100,20 +102,30 @@ module.exports = {
 		let { scholar } = req.body
 
 		if (scholar) {
-			const result = await db.collection('scholars').insertOne(scholar)
-			console.log('POST /scholars')
-			console.log(result)
+			
+			try {
+				const result = await db.collection('scholars').insertOne(scholar)
+				console.log('POST /scholars')
+				console.log(result)
 
-			if(result.insertedId) {
 				res.json({
 					success: true,
 					scholar
 				})
+
+			} catch (err) {
+				console.log(err)
+				if(err.code === 11000){
+					res.json({
+						success: false,
+						msg: 'duplicate ronin'
+					})
+				}
 			}
 		} else {
 			res.json({
 				success: false,
-				message: `There's not scholar :(`
+				msg: `There's not scholar :(`
 			})	
 		}
 	},
@@ -195,6 +207,7 @@ module.exports = {
 	},
 
 	markScholar: async (req, res) => {
+		console.log('marking...')
 		const { db } = req.ctx
 		const { ronin } = req.params
 		const newEntry = req.body
