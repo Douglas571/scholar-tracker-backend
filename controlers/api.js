@@ -210,7 +210,7 @@ module.exports = {
 		console.log('marking...')
 		const { db } = req.ctx
 		const { ronin } = req.params
-		const newEntry = req.body
+		const { newEntry } = req.body
 
 		// buscar el becado
 		const scholar = await findScholar(db, { ronin })
@@ -222,14 +222,14 @@ module.exports = {
 
 		} else {
 			// si no, marcar la utlima entrada
-			const lastIndex = scholar.history.length - 1
-			scholar.history[lastIdx].endDay = true
+			const lastIdx = scholar.history.length - 1
+			scholar.history[lastIdx]['end_day'] = true
 				
 		}
 		
 		try {
 			// actualizar becado
-			const result = await db.collection('scholars').updateOne({ ronin: shoclar.ronin }, { $set: scholar })
+			const result = await db.collection('scholars').updateOne({ ronin: scholar.ronin }, { $set: scholar })
 
 			res.json({
 				success: true,
@@ -237,6 +237,7 @@ module.exports = {
 			})
 
 		} catch (err) {
+			console.log(err)
 			res.json({
 				success: false,
 				msg: err
