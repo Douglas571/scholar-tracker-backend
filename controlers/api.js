@@ -222,7 +222,10 @@ module.exports = {
 
 		} else {
 			// si no, marcar la utlima entrada
-			const lastIdx = scholar.history.length - 1
+			let lastIdx
+			if(scholar.history) {
+				lastIdx = scholar.history.length - 1
+			}
 			scholar.history[lastIdx]['end_day'] = true
 				
 		}
