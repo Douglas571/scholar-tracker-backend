@@ -5,7 +5,7 @@ async function findScholar(db, filter, options) {
 	return scholar
 }
 
-async function getAllScholars(db, filter={}, options={}) {
+async function getAllScholars(db, filter={}, options) {
 	options = options || { projection: { _id: 0 }}
 	results = await db.collection('scholars')
 					  .find(filter, options)
